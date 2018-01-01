@@ -1,11 +1,28 @@
 /* Follow along of Codeslinger.co.uk Chip8 emulator */
 
-#include <iostream>
+#include <cstdio>
 #include <vector>
 
 /* data types */
 typedef unsigned char BYTE;
 typedef unsigned short int WORD;
+
+/* decodes an instruction (1 word/2 bytes) */
+class Opcode
+{
+public:
+    // constructor
+    Opcode(WORD value){m_Value = value;}
+
+    // getters
+    WORD getValue(void){return m_Value;}
+
+    // ex) value is 0x1234
+    WORD Num1(void){return (m_Value & 0xF000);} // 0x1234 & 0xF000 = 0x1000
+    WORD Num2(void){return (m_Value & 0x0F00);} // 0x1234 & 0x0F00 = 0x0200
+private:
+    WORD m_Value;
+};
 
 class Chip8
 {
@@ -19,11 +36,18 @@ public:
 
     // load the ROM
     bool LoadROM(const char *fname);
-private:
+//private:
+
+    // Convert the 2 bytes at m_PC to a WORD
+    // and increment the PC by two (since we read to bytes)
+    WORD GetNextOpcode(void);
+
     BYTE m_GameMemory[0xFFF]; // 0xFFF bytes of memory
     BYTE m_Registers[16];     // 16 registers, 1 byte each
     WORD m_AddressI;          // 16 bit address register I
     WORD m_PC;                // 16 bit program counter
+
+    BYTE m_ScreenData[64][32]; // screen pixels
 
     std::vector<WORD> m_Stack;      // 16 bit stack
 };
@@ -46,8 +70,8 @@ bool Chip8::LoadROM(const char *fname)
 {
     FILE *fp = fopen(fname, "rb");
     if(!fp){
-        std::cerr << "Chip8::LoadROM: Failed to open '"
-            << fname << "'\n";
+        fprintf(stderr, "Chip8::LoadROM: Failed to open '%s'\n",
+            fname);
         return false;
     }
 
@@ -60,13 +84,32 @@ bool Chip8::LoadROM(const char *fname)
     return true;
 }
 
+// Convert the 2 bytes at m_PC to a WORD
+// and increment the PC by two (since we read to bytes)
+WORD Chip8::GetNextOpcode(void)
+{
+    // example - say our bytes at PC are 0xAB and 0xCD,
+    // then the opcode needs to be 0xABCD
+
+    WORD res = 0; // result; 0x0000 right now
+
+    res   = m_GameMemory[m_PC];  // 0x00AB
+    res <<= 8;                   // 0xAB00
+    res |= m_GameMemory[m_PC+1]; // 0xABCD (0xAB00 | 0x00CD)
+
+    // increment the PC
+    m_PC += 2;
+
+    return res;
+}
+
 int main(int argc, char **argv)
 {
     Chip8 chip;
 
     // make sure ROM filename was given
     if(argc != 2) {
-        std::cout << "Usage: " << argv[0] << " [ROM file]\n";
+        printf("Usage: %s [ROM file]\n", argv[0]);
         return 0;
     }
 
@@ -77,6 +120,9 @@ int main(int argc, char **argv)
     if(!chip.LoadROM(argv[1])) {
         return -1;
     }
+
+    // test get the next opcode
+    printf("Next Opcode: 0x%X\n", chip.GetNextOpcode());
 
     return 0;
 }
