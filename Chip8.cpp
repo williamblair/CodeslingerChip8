@@ -1,6 +1,7 @@
 /* Follow along of Codeslinger.co.uk Chip8 emulator */
 
 #include <cstdio>
+#include <cstdlib>
 #include <vector>
 
 /* data types */
@@ -36,11 +37,16 @@ public:
 
     // load the ROM
     bool LoadROM(const char *fname);
+
 //private:
 
     // Convert the 2 bytes at m_PC to a WORD
     // and increment the PC by two (since we read to bytes)
-    WORD GetNextOpcode(void);
+    Opcode GetNextOpcode(void);
+
+    // get the next opcode, decode it, and execute it (call the associated
+    // function)
+    bool RunNextInstruction(void);
 
     BYTE m_GameMemory[0xFFF]; // 0xFFF bytes of memory
     BYTE m_Registers[16];     // 16 registers, 1 byte each
@@ -86,13 +92,14 @@ bool Chip8::LoadROM(const char *fname)
 
 // Convert the 2 bytes at m_PC to a WORD
 // and increment the PC by two (since we read to bytes)
-WORD Chip8::GetNextOpcode(void)
+Opcode Chip8::GetNextOpcode(void)
 {
     // example - say our bytes at PC are 0xAB and 0xCD,
     // then the opcode needs to be 0xABCD
 
     WORD res = 0; // result; 0x0000 right now
 
+    // combine next 2 bytes into 1 word
     res   = m_GameMemory[m_PC];  // 0x00AB
     res <<= 8;                   // 0xAB00
     res |= m_GameMemory[m_PC+1]; // 0xABCD (0xAB00 | 0x00CD)
@@ -100,7 +107,35 @@ WORD Chip8::GetNextOpcode(void)
     // increment the PC
     m_PC += 2;
 
-    return res;
+    Opcode o(res);
+    return o;
+}
+
+// get the next opcode, decode it, and execute it (call the associated
+// function)
+bool Chip8::RunNextInstruction(void)
+{
+    try
+    {
+        // get the next opcode
+        Opcode op = GetNextOpcode();
+
+        // decode
+        switch(op.Num1())
+        {
+            default:
+                throw op;
+        }
+    }
+    catch(Opcode &o)
+    {
+        fprintf(stderr, "Chip8::RunNextInstruction: Exception: ");
+        fprintf(stderr, "Unhandled Opcode: 0x%X\n", o.getValue());
+
+        exit(EXIT_FAILURE);
+    }
+
+    return true;
 }
 
 int main(int argc, char **argv)
@@ -121,8 +156,12 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    // test get the next opcode
-    printf("Next Opcode: 0x%X\n", chip.GetNextOpcode());
+    // inf loop
+    for(;;)
+    {
+        chip.RunNextInstruction();
+        getchar();
+    }
 
     return 0;
 }
