@@ -50,7 +50,7 @@ void Chip8::m_Op3XNN(Opcode op)
 
 /* 4XNN: skips the next instruction if Vx !=NN
  * same as 3XNN except jump if NOT equal */
-void Chip8::Op4XNN(Opcode op)
+void Chip8::m_Op4XNN(Opcode op)
 {
     int regx = op.Num2();
     regx = regx >> 8;
