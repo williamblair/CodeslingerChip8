@@ -4,59 +4,7 @@
 #include <cstdlib>
 #include <vector>
 
-/* data types */
-typedef unsigned char BYTE;
-typedef unsigned short int WORD;
-
-/* decodes an instruction (1 word/2 bytes) */
-class Opcode
-{
-public:
-    // constructor
-    Opcode(WORD value){m_Value = value;}
-
-    // getters
-    WORD getValue(void){return m_Value;}
-
-    // ex) value is 0x1234
-    WORD Num1(void){return (m_Value & 0xF000);} // 0x1234 & 0xF000 = 0x1000
-    WORD Num2(void){return (m_Value & 0x0F00);} // 0x1234 & 0x0F00 = 0x0200
-private:
-    WORD m_Value;
-};
-
-class Chip8
-{
-public:
-    // constructor/deconstructor
-    Chip8(void);
-    ~Chip8(void);
-
-    // reset member variables
-    void CPUReset(void);
-
-    // load the ROM
-    bool LoadROM(const char *fname);
-
-//private:
-
-    // Convert the 2 bytes at m_PC to a WORD
-    // and increment the PC by two (since we read to bytes)
-    Opcode GetNextOpcode(void);
-
-    // get the next opcode, decode it, and execute it (call the associated
-    // function)
-    bool RunNextInstruction(void);
-
-    BYTE m_GameMemory[0xFFF]; // 0xFFF bytes of memory
-    BYTE m_Registers[16];     // 16 registers, 1 byte each
-    WORD m_AddressI;          // 16 bit address register I
-    WORD m_PC;                // 16 bit program counter
-
-    BYTE m_ScreenData[64][32]; // screen pixels
-
-    std::vector<WORD> m_Stack;      // 16 bit stack
-};
+#include "Chip8.hpp"
 
 /* Constructor/Deconstructor */
 Chip8::Chip8(void){}
@@ -123,9 +71,45 @@ bool Chip8::RunNextInstruction(void)
         // decode
         switch(op.Num1())
         {
+            case 0x0000:
+                switch(op.Num4())
+                {
+                    case 0x0000:
+                        m_Op00E0(op);
+                        break;
+                    case 0x000E:
+                        m_Op00EE(op);
+                        break;
+                    default:
+                        throw op;
+                }
+                break;
+            case 0x1000:
+                m_Op1NNN(op);
+                break;
+            case 0x2000:
+                break;
+            case 0x3000:
+                m_Op3XNN(op);
+                break;
+            case 0x4000:
+            case 0x5000:
+            case 0x6000:
+            case 0x7000:
+            case 0x8000:
+            case 0x9000:
+            case 0xA000:
+            case 0xB000:
+            case 0xC000:
+            case 0xD000:
+            case 0xE000:
+            case 0xF000:
             default:
                 throw op;
         }
+
+        // DEBUG
+        printf("0x%X  0x%X\n", m_PC, op.getValue());
     }
     catch(Opcode &o)
     {
