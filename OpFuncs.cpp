@@ -91,17 +91,39 @@ void Chip8::m_Op5XY0(Opcode op)
 void Chip8::m_Op6XNN(Opcode op)
 {
     // get NN
-    WORD nn = 0x0000;
-    int n1 = op.Num3(); // 0x12
-    nn = n1 << 8;      // 0x1200
-    int n2 = op.Num4(); // 0x34
-    nn |= n2;          // 0x1200 | 0x0034 = 0x1234
+    WORD nn = op.Num34();
 
+    // get the register
+    int regx = op.Num2() >> 8;
 
+    // assign the value at the register
+    m_Registers[regx] = nn;
+
+    // test
+    printf("Registers[0x%X]: 0x%X\n", regx, m_Registers[regx]);
 }
 
+/* 7XNN: adds NN to Vx (No flags/overflow check) */
 void Chip8::m_Op7XNN(Opcode op)
-{}
+{
+    // get NN
+    int NN = op.Num34(); // no shifting needed
+
+    // get the register
+    int regx = op.Num2();
+    regx = regx >> 8;
+
+    // test
+    printf("Vx Before: 0x%X\n", m_Registers[regx]);
+    printf("NN: 0x%X\n", NN);
+
+    // add the values
+    m_Registers[regx] += NN;
+
+    // test
+    printf("Vx After: 0x%X\n", m_Registers[regx]);
+
+}
 
 /* 8XY4: Y is added to register X */
 void Chip8::m_Op8XY4(Opcode op)
@@ -147,6 +169,19 @@ void Chip8::m_Op8XY5(Opcode op)
 
     // write the result
     m_Registers[regx] = xval - yval;
+}
+
+/* ANNN: Sets I to the address NNN */
+void Chip8::m_OpANNN(Opcode op)
+{
+    // Get NNN
+    int NNN = op.Num234(); // no need to shift here
+
+    // set I to its value
+    m_AddressI = NNN;
+
+    // test
+    printf("Address I: 0x%X\n", m_AddressI);
 }
 
 /* DXYN - draw a sprite at coord (x,y) with a width of 8 and height of N */

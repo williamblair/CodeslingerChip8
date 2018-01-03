@@ -2,3 +2,5 @@
 *.rom
 *.exe
 *.ch8
+*.swp
+*.out

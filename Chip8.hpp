@@ -30,6 +30,8 @@ public:
     WORD Num4(void){return (m_Value & 0x000F);} // 0x1234 & 0x000F = 0x0004
 
     WORD Num234(void){return (m_Value & 0x0FFF);} // used for op 1NNN
+
+    WORD Num34(void){return (m_Value & 0x00FF);}
 private:
     WORD m_Value;
 };
@@ -79,6 +81,8 @@ public:
 
     void m_Op8XY4(Opcode op);
     void m_Op8XY5(Opcode op);
+
+    void m_OpANNN(Opcode op);
 
     void m_OpDXYN(Opcode op);
 

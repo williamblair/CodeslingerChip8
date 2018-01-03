@@ -88,22 +88,46 @@ bool Chip8::RunNextInstruction(void)
                 m_Op1NNN(op);
                 break;
             case 0x2000:
-                break;
+                throw op;
             case 0x3000:
                 m_Op3XNN(op);
                 break;
             case 0x4000:
+                throw op;
+                break;
             case 0x5000:
+                throw op;
+                break;
             case 0x6000:
+                m_Op6XNN(op);
+                break;
             case 0x7000:
+                m_Op7XNN(op);
+                break;
             case 0x8000:
+                throw op;
+                break;
             case 0x9000:
+                throw op;
+                break;
             case 0xA000:
+                m_OpANNN(op);
+                break;
             case 0xB000:
+                throw op;
+                break;
             case 0xC000:
+                throw op;
+                break;
             case 0xD000:
+                m_OpDXYN(op);
+                break;
             case 0xE000:
+                throw op;
+                break;
             case 0xF000:
+                throw op;
+                break;
             default:
                 throw op;
         }
