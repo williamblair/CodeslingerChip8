@@ -85,6 +85,8 @@ public:
     void m_OpANNN(Opcode op);
 
     void m_OpDXYN(Opcode op);
+    
+    void m_OpFX1E(Opcode op);
 
     void m_OpFX33(Opcode op);
 

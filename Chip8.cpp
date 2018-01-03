@@ -1,8 +1,3 @@
-/* Follow along of Codeslinger.co.uk Chip8 emulator */
-
-#include <cstdio>
-#include <cstdlib>
-#include <vector>
 
 #include "Chip8.hpp"
 
@@ -126,7 +121,14 @@ bool Chip8::RunNextInstruction(void)
                 throw op;
                 break;
             case 0xF000:
-                throw op;
+                switch(op.Num34())
+                {
+                    case 0x1E:
+                        m_OpFX1E(op);
+                        break;
+                    default:
+                        throw op;
+                }
                 break;
             default:
                 throw op;
@@ -144,32 +146,4 @@ bool Chip8::RunNextInstruction(void)
     }
 
     return true;
-}
-
-int main(int argc, char **argv)
-{
-    Chip8 chip;
-
-    // make sure ROM filename was given
-    if(argc != 2) {
-        printf("Usage: %s [ROM file]\n", argv[0]);
-        return 0;
-    }
-
-    // reset the CPU
-    chip.CPUReset();
-
-    // load the ROM
-    if(!chip.LoadROM(argv[1])) {
-        return -1;
-    }
-
-    // inf loop
-    for(;;)
-    {
-        chip.RunNextInstruction();
-        getchar();
-    }
-
-    return 0;
 }

@@ -226,6 +226,24 @@ void Chip8::m_OpDXYN(Opcode op)
     }
 }
 
+/* FX1E: adds Vx to Address I */
+void Chip8::m_OpFX1E(Opcode op)
+{
+    // get regx
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    // test
+    printf("Address I before: 0x%X\n", m_AddressI);
+    printf("Vx: 0x%X\n", m_Registers[regx]);
+    
+    // add the value to I
+    m_AddressI += m_Registers[regx];
+    
+    // test
+    printf("Address I after: 0x%X\n", m_AddressI);
+}
+
 /* FX33: binary coded decimal - store Vx as
  * BCD 3,2,1 at address I */
 void Chip8::m_OpFX33(Opcode op)
