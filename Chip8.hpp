@@ -6,6 +6,8 @@
 
 #include <climits>
 
+#include "Display.hpp"
+
 #ifndef CHIP8_H_INCLUDED
 #define CHIP8_H_INCLUDED
 
@@ -58,6 +60,11 @@ public:
     // get the next opcode, decode it, and execute it (call the associated
     // function)
     bool RunNextInstruction(void);
+    
+    // draw using the DXYN func however we're implementing it
+    // coords x,y, height n, width 8 pixels
+    // used by m_OpDXYN
+    //bool drawSprite(Display &d, int coordx, int coordy, int n);
 
     //////////////////////////////////////////////////////////////////
     //                 Opcode Instruction Functions                 //
@@ -99,7 +106,9 @@ public:
     WORD m_AddressI;          // 16 bit address register I
     WORD m_PC;                // 16 bit program counter
 
-    BYTE m_ScreenData[64][32]; // screen pixels
+    //BYTE m_ScreenData[64][32]; // screen pixels
+    BYTE m_ScreenData[320][640][3]; // y,x,3 channels
+    //BYTE m_ScreenData[64*32*3]; // screen pixels - width, height, rgb
 
     std::vector<WORD> m_Stack;      // 16 bit stack
 };

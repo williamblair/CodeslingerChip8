@@ -8,7 +8,7 @@ SOURCES = Display.cpp Chip8.cpp main.cpp OpFuncs.cpp
 CFLAGS = 
 INCDIRS = 
 LIBDIRS = 
-LIBS = -lSDL2
+LIBS = -lSDL -lGL
 
 all:
 	$(CC) $(CFLAGS) $(SOURCES) -o $(BIN) $(INCDIRS) $(LIBDIRS) $(LIBS) 

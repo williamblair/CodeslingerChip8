@@ -15,39 +15,51 @@ Display::Display(const int width, const int height, const char *title)
     }
     
     // create the window
-    m_Window = SDL_CreateWindow(
-        title, 
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        width, height,
-        SDL_WINDOW_SHOWN
-    );
-    if(!m_Window)
+    // 8 is BPP - 8 bits per pixel
+    m_WinSurface = SDL_SetVideoMode(width, height, 8, SDL_OPENGL);
+    if(!m_WinSurface)
     {
-        fprintf(stderr, "Failed to create window: %s\n", SDL_GetError());
+        fprintf(stderr, "Failed to create SDL window: %s\n", SDL_GetError());
         exit(EXIT_FAILURE);
     }
     
-    // get the window surface
-    m_Surface = SDL_GetWindowSurface(m_Window);
-    if(!m_Surface)
-    {
-        fprintf(stderr, "Failed to get window surface: %s\n", SDL_GetError());
-        exit(EXIT_FAILURE);
-    }
+    // set the window title
+    SDL_WM_SetCaption(title, NULL);
     
+    // set opengl settings
+    glViewport(0, 0, width, height);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glOrtho(0, width, height, 0, -1.0f, -1.0f);
+    glClearColor(0,0,0,1.0f);
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    glShadeModel(GL_FLAT);
+    
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_DEPTH_TEST); // 2D - no need for depth testing
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DITHER);
+    glDisable(GL_BLEND);
     
 }
 
 /* Deconstructor */
 Display::~Display(void)
 {
-    if(m_Surface)                   SDL_FreeSurface(m_Surface);
-    if(m_Window)                    SDL_DestroyWindow(m_Window);
+    if(m_WinSurface)                SDL_FreeSurface(m_WinSurface);
     if(SDL_WasInit(SDL_INIT_VIDEO)) SDL_Quit();
 }
 
+/* Recreate the display surface */
+/*bool Display::updateSurface(unsigned char data[64][32])
+{
+    
+    
+    return true;
+}*/
+
 /* Update screen and handle keys */
-void Display::update(void)
+void Display::update(unsigned char data[320][640][3])
 {
     // check keys
     SDL_Event e;
@@ -59,13 +71,17 @@ void Display::update(void)
         // TODO - add escape key exit
     }
     
-    // clear the screen
-    SDL_FillRect(m_Surface, NULL, SDL_MapRGB(m_Surface->format, 255, 255, 255));
+    // opengl stuff
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+    glRasterPos2i(-1, 1);
+    glPixelZoom(1, -1);
     
-    // draw stuff (specifically pixels)
+    glDrawPixels(width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
     
-    // flip the screen
-    SDL_UpdateWindowSurface(m_Window);
+    SDL_GL_SwapBuffers();
+    
+    glFlush();
     
     // Delay
     // test

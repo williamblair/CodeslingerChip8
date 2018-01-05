@@ -1,6 +1,8 @@
 /* How to show graphics */
 
-#include <SDL2/SDL.h>
+// uses SDL 1.2
+#include <SDL/SDL.h>
+#include <SDL/SDL_opengl.h>
 
 #include <stdio.h>
 
@@ -15,10 +17,12 @@ public:
     ~Display(void);
     
     // clear screen and get keys
-    void update(void);
+    void update(unsigned char data[320][640][3]);
+    
+    // recreate the surface from the given array
+    //bool updateSurface(unsigned char data[320][640][3]);
 private:
-    SDL_Window  *m_Window;
-    SDL_Surface *m_Surface;
+    SDL_Surface *m_WinSurface;
     
     int width, height;
 };
