@@ -83,7 +83,8 @@ bool Chip8::RunNextInstruction(void)
                 m_Op1NNN(op);
                 break;
             case 0x2000:
-                throw op;
+                m_Op2NNN(op);
+                break;
             case 0x3000:
                 m_Op3XNN(op);
                 break;
@@ -100,7 +101,39 @@ bool Chip8::RunNextInstruction(void)
                 m_Op7XNN(op);
                 break;
             case 0x8000:
-                throw op;
+                switch(op.Num4())
+                {
+                    case 0x0:
+                        m_Op8XY0(op);
+                        break;
+                    case 0x1:
+                        throw op;
+                        break;
+                    case 0x2:
+                        throw op;
+                        break;
+                    case 0x3:
+                        throw op;
+                        break;
+                    case 0x4:
+                        m_Op8XY4(op);
+                        break;
+                    case 0x5:
+                        m_Op8XY5(op);
+                        break;
+                    case 0x6:
+                        throw op;
+                        break;
+                    case 0x7:
+                        throw op;
+                        break;
+                    case 0xE:
+                        throw op;
+                        break;
+                    default:
+                        throw op;
+                        break;
+                }
                 break;
             case 0x9000:
                 throw op;

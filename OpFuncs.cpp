@@ -130,6 +130,21 @@ void Chip8::m_Op7XNN(Opcode op)
 
 }
 
+/* 8XY0: sets Vx equal to Vy */
+void Chip8::m_Op8XY0(Opcode op)
+{
+    // get regx
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    // get regy
+    int regy = op.Num3();
+    regy = regy >> 4;
+    
+    // set Vx = Vy
+    m_Registers[regx] = m_Registers[regy];
+}
+
 /* 8XY4: Y is added to register X */
 void Chip8::m_Op8XY4(Opcode op)
 {

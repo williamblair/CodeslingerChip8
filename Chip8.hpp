@@ -80,7 +80,7 @@ public:
     // constants (vx = NN and vx += NN)
     void m_Op6XNN(Opcode op);
     void m_Op7XNN(Opcode op);
-
+    void m_Op8XY0(Opcode op);
     void m_Op8XY4(Opcode op);
     void m_Op8XY5(Opcode op);
 
