@@ -4,3 +4,6 @@
 *.ch8
 *.swp
 *.out
+._sdl-config
+sdl-config
+*.dll

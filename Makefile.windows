@@ -1,0 +1,16 @@
+# Makefile
+
+CC = C:\MinGW\bin\mingw32-g++.exe
+BIN = a.exe
+
+SOURCES = Display.cpp Chip8.cpp main.cpp OpFuncs.cpp
+
+CFLAGS = 
+INCDIRS = -IC:\MinGW\external_libs\SDL-devel-1.2.15-mingw32\SDL-1.2.15\include
+LIBDIRS = -LC:\MinGW\external_libs\SDL-devel-1.2.15-mingw32\SDL-1.2.15\lib
+LIBS = -lmingw32 -lSDL -lopengl32
+
+all:
+	$(CC) $(CFLAGS) $(SOURCES) -o $(BIN) $(INCDIRS) $(LIBDIRS) $(LIBS) 
+clean:
+	rm -rf $(BIN)

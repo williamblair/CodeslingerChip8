@@ -7,6 +7,11 @@
 #include "Chip8.hpp"
 #include "Display.hpp"
 
+// Stupid SDL issue
+#ifdef __WIN32
+#undef main
+#endif
+
 int main(int argc, char **argv)
 {
     Chip8 chip;
