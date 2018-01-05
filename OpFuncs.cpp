@@ -31,6 +31,7 @@ void Chip8::m_Op00EE(Opcode op)
     m_Stack.pop_back();
 }
 
+/* 2NNN: Jump (set PC value as NNN) */
 void Chip8::m_Op2NNN(Opcode op)
 {
     m_Stack.push_back(m_PC); // save the PC
@@ -187,53 +188,6 @@ void Chip8::m_OpANNN(Opcode op)
     // test
     printf("Address I: 0x%X\n", m_AddressI);
 }
-
-/*bool Chip8::drawSprite(Display &d, int coordx, int coordy, int n)
-{
-    // loop the amount of vertical lines needed to draw
-    for(int yline = 0; yline < n; yline++)
-    {
-        // sprite data stored at m_AddressI
-        BYTE data = m_GameMemory[m_AddressI+yline];
-        int xpixelinv = 7;
-        int xpixel = 0;
-        for(xpixel=0; xpixel < 8; xpixel++,xpixelinv--)
-        {
-            
-            // check for transparency
-            // xpixelinv required by the way sprite data is stored
-            int mask = 1 << xpixelinv;
-            if(data & mask)
-            {
-                int x = coordx + xpixel;
-                int y = coordy + yline;
-                
-                //int index = (y*64 + x) * 3;
-                
-                if(m_ScreenData[x][y] == 1){
-                //if(m_ScreenData[index] != 0){
-                    m_Registers[0xF] = 1; // collision
-                }
-                // toggle the pixel state
-                m_ScreenData[x][y] ^= 1;
-                //m_ScreenData[x][y][0] ^= 1;
-                //m_ScreenData[x][y][1] ^= 1;
-                //m_ScreenData[x][y][2] ^= 1;
-                //m_ScreenData[y*64+x + 0] = (m_ScreenData[y*64+x + 0] == 255) ? 0 : 255;
-                //m_ScreenData[y*64+x + 1] = (m_ScreenData[y*64+x + 1] == 255) ? 0 : 255;
-                //m_ScreenData[y*64+x + 2] = (m_ScreenData[y*64+x + 2] == 255) ? 0 : 255;
-
-                //m_ScreenData[index + 0] = (m_ScreenData[index + 0] == 0xFFFFFF) ? 0 : 0xFFFFFF;
-                //m_ScreenData[index + 1] = (m_ScreenData[index + 2] == 0xFFFFFF) ? 0 : 0xFFFFFF;
-                //m_ScreenData[index + 2] = (m_ScreenData[index + 3] == 0xFFFFFF) ? 0 : 0xFFFFFF;
-            }
-        }
-    }
-    
-    // update the screen surface
-    d.updateSurface(m_ScreenData);
-    
-}*/ 
 
 /* DXYN - draw a sprite at coord (x,y) with a width of 8 and height of N */
 void Chip8::m_OpDXYN(Opcode op)

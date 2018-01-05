@@ -60,11 +60,6 @@ public:
     // get the next opcode, decode it, and execute it (call the associated
     // function)
     bool RunNextInstruction(void);
-    
-    // draw using the DXYN func however we're implementing it
-    // coords x,y, height n, width 8 pixels
-    // used by m_OpDXYN
-    //bool drawSprite(Display &d, int coordx, int coordy, int n);
 
     //////////////////////////////////////////////////////////////////
     //                 Opcode Instruction Functions                 //
