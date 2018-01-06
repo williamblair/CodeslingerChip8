@@ -6,6 +6,8 @@
 
 #include <stdio.h>
 
+#include "Chip8.hpp"
+
 #ifndef DISPLAY_H_INCLUDED
 #define DISPLAY_H_INCLUDED
 
@@ -16,8 +18,11 @@ public:
     Display(const int width, const int height, const char *title);
     ~Display(void);
     
-    // clear screen and get keys
+    // clear screen
     void update(unsigned char data[320][640][3]);
+    
+    // check keys
+    void pollEvents(Chip8 &chip);
     
     // recreate the surface from the given array
     //bool updateSurface(unsigned char data[320][640][3]);

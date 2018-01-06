@@ -33,6 +33,7 @@ int main(int argc, char **argv)
     }
 
     // fps of the game to run at
+    // the timers run at 60hz so 60fps is perfect
     int fps = 60;
     
     // found in chip8 src ini
@@ -49,6 +50,7 @@ int main(int argc, char **argv)
     // inf loop
     for(;;)
     {
+        
         //chip.RunNextInstruction(display);
         
         //display.update(chip.m_ScreenData);
@@ -58,8 +60,10 @@ int main(int argc, char **argv)
         
         if( (time2 + interval) < current )
         {
-            // TODO - add cpu timers
-            //chip.decreaseTimers();
+            display.pollEvents(chip);
+            
+            // TODO - add sound timer
+            chip.DecreaseTimers();
             
             // execute our calculated number of ops
             for(int i=0; i<numframe; i++)

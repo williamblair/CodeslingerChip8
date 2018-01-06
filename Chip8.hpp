@@ -5,8 +5,7 @@
 #include <vector>
 
 #include <climits>
-
-#include "Display.hpp"
+#include <ctime>
 
 #ifndef CHIP8_H_INCLUDED
 #define CHIP8_H_INCLUDED
@@ -50,6 +49,14 @@ public:
 
     // load the ROM
     bool LoadROM(const char *fname);
+    
+    // decrease sound and delay timers (should be called at a rate
+    // of 60hz)
+    bool DecreaseTimers(void);
+    
+    // set a key value with key number 'key' and value 1 (on)
+    // or 0 (off)
+    bool SetKey(int key, int val);
 
 //private:
 
@@ -81,18 +88,46 @@ public:
     void m_Op6XNN(Opcode op);
     void m_Op7XNN(Opcode op);
     void m_Op8XY0(Opcode op);
+    void m_Op8XY1(Opcode op);
+    void m_Op8XY2(Opcode op);
+    void m_Op8XY3(Opcode op);
     void m_Op8XY4(Opcode op);
     void m_Op8XY5(Opcode op);
+    void m_Op8XY6(Opcode op);
+    void m_Op8XY7(Opcode op);
+    void m_Op8XYE(Opcode op);
+    
+    void m_Op9XY0(Opcode op);
 
     void m_OpANNN(Opcode op);
+    
+    void m_OpBNNN(Opcode op);
+    
+    void m_OpCXNN(Opcode op);
 
     void m_OpDXYN(Opcode op);
     
+    // key handlers (if key == Vx or if key != Vx)
+    void m_OpEX9E(Opcode op);
+    void m_OpEXA1(Opcode op);
+    
+    void m_OpFX07(Opcode op);
+    
+    void m_OpFX0A(Opcode op);
+    
+    void m_OpFX15(Opcode op);
+    
+    void m_OpFX18(Opcode op);
+    
     void m_OpFX1E(Opcode op);
+    
+    void m_OpFX29(Opcode op);
 
     void m_OpFX33(Opcode op);
 
     void m_OpFX55(Opcode op);
+    
+    void m_OpFX65(Opcode op);
 
     //////////////////////////////////////////////////////////////////
 
@@ -106,6 +141,10 @@ public:
     //BYTE m_ScreenData[64*32*3]; // screen pixels - width, height, rgb
 
     std::vector<WORD> m_Stack;      // 16 bit stack
+    
+    BYTE m_Keys[16];   // 16 keys 0-F
+    BYTE m_DelayTimer;
+    BYTE m_SoundTimer;
 };
 
 #endif // CHIP8_H_INCLUDED

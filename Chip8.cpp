@@ -10,8 +10,14 @@ void Chip8::CPUReset(void)
 {
     m_AddressI = 0;
     m_PC = 0x200;
+    
+    m_DelayTimer = 0;
+    m_SoundTimer = 0;
 
     m_Stack.assign(1, 0); // 1 entry with a value of 0
+    
+    // rand() used by CXNN
+    srand(time(0));
 }
 
 /* Load the ROM */
@@ -30,6 +36,29 @@ bool Chip8::LoadROM(const char *fname)
     /* close the file */
     fclose(fp);
 
+    return true;
+}
+
+// decrease sound and delay timers (should be called at a rate
+// of 60hz)
+bool Chip8::DecreaseTimers(void)
+{
+    if(m_DelayTimer > 0) m_DelayTimer--;
+    
+    if(m_SoundTimer > 0) {
+        // TODO - make beep here!
+        m_SoundTimer--;
+    }
+    
+    
+    return true;
+}
+
+bool Chip8::SetKey(int key, int val)
+{
+    // TODO - should I check for valid values?
+    m_Keys[key] = val;
+    
     return true;
 }
 
@@ -67,16 +96,17 @@ bool Chip8::RunNextInstruction(void)
         switch(op.Num1())
         {
             case 0x0000:
-                switch(op.Num4())
+                switch(op.getValue())
                 {
-                    case 0x0000:
+                    case 0x00E0:
                         m_Op00E0(op);
                         break;
-                    case 0x000E:
+                    case 0x00EE:
                         m_Op00EE(op);
                         break;
                     default:
                         throw op;
+                        break;
                 }
                 break;
             case 0x1000:
@@ -89,10 +119,10 @@ bool Chip8::RunNextInstruction(void)
                 m_Op3XNN(op);
                 break;
             case 0x4000:
-                throw op;
+                m_Op4XNN(op);
                 break;
             case 0x5000:
-                throw op;
+                m_Op5XY0(op);
                 break;
             case 0x6000:
                 m_Op6XNN(op);
@@ -107,13 +137,13 @@ bool Chip8::RunNextInstruction(void)
                         m_Op8XY0(op);
                         break;
                     case 0x1:
-                        throw op;
+                        m_Op8XY1(op);
                         break;
                     case 0x2:
-                        throw op;
+                        m_Op8XY2(op);
                         break;
                     case 0x3:
-                        throw op;
+                        m_Op8XY3(op);
                         break;
                     case 0x4:
                         m_Op8XY4(op);
@@ -122,13 +152,13 @@ bool Chip8::RunNextInstruction(void)
                         m_Op8XY5(op);
                         break;
                     case 0x6:
-                        throw op;
+                        m_Op8XY6(op);
                         break;
                     case 0x7:
-                        throw op;
+                        m_Op8XY7(op);
                         break;
                     case 0xE:
-                        throw op;
+                        m_Op8XYE(op);
                         break;
                     default:
                         throw op;
@@ -136,28 +166,62 @@ bool Chip8::RunNextInstruction(void)
                 }
                 break;
             case 0x9000:
-                throw op;
+                m_Op9XY0(op);
                 break;
             case 0xA000:
                 m_OpANNN(op);
                 break;
             case 0xB000:
-                throw op;
+                m_OpBNNN(op);
                 break;
             case 0xC000:
-                throw op;
+                m_OpCXNN(op);
                 break;
             case 0xD000:
                 m_OpDXYN(op);
                 break;
             case 0xE000:
-                throw op;
+                switch(op.Num34())
+                {
+                    case 0x9E:
+                        m_OpEX9E(op);
+                        break;
+                    case 0xA1:
+                        m_OpEXA1(op);
+                        break;
+                    default:
+                        throw op;
+                }
                 break;
             case 0xF000:
                 switch(op.Num34())
                 {
+                    case 0x07:
+                        m_OpFX07(op);
+                        break;
+                    case 0x0A:
+                        m_OpFX0A(op);
+                        break;
+                    case 0x15:
+                        m_OpFX15(op);
+                        break;
+                    case 0x18:
+                        m_OpFX18(op);
+                        break;
                     case 0x1E:
                         m_OpFX1E(op);
+                        break;
+                    case 0x29:
+                        m_OpFX29(op);
+                        break;
+                    case 0x33:
+                        m_OpFX33(op);
+                        break;
+                    case 0x55:
+                        m_OpFX55(op);
+                        break;
+                    case 0x65:
+                        m_OpFX65(op);
                         break;
                     default:
                         throw op;
@@ -168,7 +232,7 @@ bool Chip8::RunNextInstruction(void)
         }
 
         // DEBUG
-        printf("0x%X  0x%X\n", m_PC, op.getValue());
+        //printf("0x%X  0x%X\n", m_PC, op.getValue());
     }
     catch(Opcode &o)
     {

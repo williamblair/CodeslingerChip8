@@ -2,13 +2,6 @@
 
 #include "Chip8.hpp"
 
-/* Jump instruction */
-void Chip8::m_Op1NNN(Opcode op)
-{
-    m_PC = op.Num234();
-}
-
-
 /* 00E0: Clear Screen */
 void Chip8::m_Op00E0(Opcode op)
 {
@@ -29,6 +22,12 @@ void Chip8::m_Op00EE(Opcode op)
 {
     m_PC = m_Stack.back();
     m_Stack.pop_back();
+}
+
+/* 1NNN: goto NNN (move to address NNN) */
+void Chip8::m_Op1NNN(Opcode op)
+{
+    m_PC = op.Num234();
 }
 
 /* 2NNN: Jump (set PC value as NNN) */
@@ -105,7 +104,7 @@ void Chip8::m_Op6XNN(Opcode op)
     m_Registers[regx] = nn;
 
     // test
-    printf("Registers[0x%X]: 0x%X\n", regx, m_Registers[regx]);
+    //printf("Registers[0x%X]: 0x%X\n", regx, m_Registers[regx]);
 }
 
 /* 7XNN: adds NN to Vx (No flags/overflow check) */
@@ -119,14 +118,14 @@ void Chip8::m_Op7XNN(Opcode op)
     regx = regx >> 8;
 
     // test
-    printf("Vx Before: 0x%X\n", m_Registers[regx]);
-    printf("NN: 0x%X\n", NN);
+    //printf("Vx Before: 0x%X\n", m_Registers[regx]);
+    //printf("NN: 0x%X\n", NN);
 
     // add the values
     m_Registers[regx] += NN;
 
     // test
-    printf("Vx After: 0x%X\n", m_Registers[regx]);
+    //printf("Vx After: 0x%X\n", m_Registers[regx]);
 
 }
 
@@ -143,6 +142,42 @@ void Chip8::m_Op8XY0(Opcode op)
     
     // set Vx = Vy
     m_Registers[regx] = m_Registers[regy];
+}
+
+/* 8XY1: sets Vx to Vx | Vy */
+void Chip8::m_Op8XY1(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    int regy = op.Num3();
+    regy = regy >> 4;
+    
+    m_Registers[regx] = m_Registers[regx] | m_Registers[regy];
+}
+
+/* 8XY2: sets Vx to Vx & Vy (bit op) */
+void Chip8::m_Op8XY2(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    int regy = op.Num3();
+    regy = regy >> 4;
+    
+    m_Registers[regx] = m_Registers[regx] & m_Registers[regy];
+}
+
+/* 8XY3: sets Vx to Vx XOR Vy */
+void Chip8::m_Op8XY3(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    int regy = op.Num3();
+    regy = regy >> 4;
+    
+    m_Registers[regx] = m_Registers[regx] ^ m_Registers[regy];
 }
 
 /* 8XY4: Y is added to register X */
@@ -191,6 +226,83 @@ void Chip8::m_Op8XY5(Opcode op)
     m_Registers[regx] = xval - yval;
 }
 
+/* 8XY6: shifts Vy right by 1 and copies result into Vx,
+ * Flag is set to the LSB of Vy before the shift */
+void Chip8::m_Op8XY6(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    int regy = op.Num3();
+    regy = regy >> 4;
+    
+    // ex) 0b0011 & 1 = 1, 0b0010 & 1 = 0
+    int LSB = m_Registers[regy] & 1;
+    m_Registers[0xF] = LSB;
+    
+    // shift Vy by 1
+    m_Registers[regy] = m_Registers[regy] >> 1;
+    
+    // copy Vy into Vx
+    m_Registers[regx] = m_Registers[regy];
+}
+
+/* 8XY7: sets Vx to Vy - Vx, Vf set to 0 when borrow,
+ * 1 when not */
+void Chip8::m_Op8XY7(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    int regy = op.Num3();
+    regy = regy >> 4;
+    
+    // default 1 when no borrow
+    m_Registers[0xF] = 1;
+    
+    // flag 0 if there is borrow
+    if(m_Registers[regx] > m_Registers[regy]){
+        m_Registers[0xF] = 0;
+    }
+    
+    // subtract
+    m_Registers[regx] = m_Registers[regy] - m_Registers[regx];
+}
+
+/* 8XYE: shifts Vy left 1 and copies the result into Vx 
+ * flag set to MSB of Vy before shift */
+void Chip8::m_Op8XYE(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    int regy = op.Num3();
+    regy = regy >> 4;
+    
+    // ex) 0b10110111 >> 7  = 1, 0b00001101 >> 7 = 0
+    int MSB = m_Registers[regy] >> 7;
+    
+    // left shift
+    m_Registers[regy] = m_Registers[regy] << 1;
+    
+    // copy into Vx
+    m_Registers[regx] = m_Registers[regy];
+}
+
+/* 9XY0: skips next instruction if Vx != Vy */
+void Chip8::m_Op9XY0(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    int regy = op.Num3();
+    regy = regy >> 4;
+    
+    if(m_Registers[regx] != m_Registers[regy]){
+        m_PC += 2;
+    }
+}
+
 /* ANNN: Sets I to the address NNN */
 void Chip8::m_OpANNN(Opcode op)
 {
@@ -201,7 +313,22 @@ void Chip8::m_OpANNN(Opcode op)
     m_AddressI = NNN;
 
     // test
-    printf("Address I: 0x%X\n", m_AddressI);
+    //printf("Address I: 0x%X\n", m_AddressI);
+}
+
+/* BNNN: jumps to address NNN + V0 */
+void Chip8::m_OpBNNN(Opcode op)
+{
+    m_PC = m_Registers[0x0] + op.Num234();
+}
+
+/* CXNN: sets Vx to rand() (usually 0-255) & NN */
+void Chip8::m_OpCXNN(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    m_Registers[regx] = (rand()%255) & op.Num34();
 }
 
 /* DXYN - draw a sprite at coord (x,y) with a width of 8 and height of N */
@@ -220,14 +347,10 @@ void Chip8::m_OpDXYN(Opcode op)
     // set the flag to zero (no hit detected)
     m_Registers[0xF] = 0;
     
-    printf("Before for loop\n");
-    
     for(int yline=0; yline < height; yline++)
     {
         // m_AddressI contains sprite data stored as a line of bytes
         BYTE data = m_GameMemory[m_AddressI + yline];
-        
-        printf("Before xpixel loop\n");
         
         int xpixel = 0;
         int xpixelinv = 7; // xpixel inverted
@@ -242,18 +365,12 @@ void Chip8::m_OpDXYN(Opcode op)
                 
                 int color = 0;
                 
-                printf("Before if!\n");
-                printf("x, y: (%d,%d)\n", x, y);
-                
                 // if collision detected
                 if(m_ScreenData[y][x][0] == 0)
                 {
                     color = 255;
                     m_Registers[0xF] = 1; // set collision flag
                 }
-                
-                // debug
-                printf("Before color loop!\n");
                 
                 // color the pixel
                 for(int i=0; i < SCALE; i++)
@@ -266,14 +383,97 @@ void Chip8::m_OpDXYN(Opcode op)
                     }
                 }
             }
-            
-            // debug
-            else
-                printf("Not data and mask!\n");
         }
     }
+}
+
+/* EX9E: Skips the next instruction if the key stored in 
+ * Vx is pressed */
+void Chip8::m_OpEX9E(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
     
-    printf("After for loop!\n");
+    int key = m_Registers[regx];
+    
+    // if the key IS pressed, skip the next instruction
+    if(m_Keys[key] == 1){
+        //printf("Keys[0x%X] IS pressed!\n", key);
+        m_PC += 2;
+    }
+}
+
+/* EXA1: skips next instruction if key() != Vx */
+void Chip8::m_OpEXA1(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    int key = m_Registers[regx];
+    
+    // if the key is NOT pressed, skip the next instruction
+    if(m_Keys[key] == 0) {
+        //printf("Keys[0x%X] NOT pressed!\n", key);
+        m_PC += 2;
+    }
+}
+
+/* FX07: sets Vx to the value of the delay timer */
+void Chip8::m_OpFX07(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    m_Registers[regx] = m_DelayTimer;
+}
+
+/* FX0A: a key press is waited, and then stored in Vx
+ * (Blocking operation - all instructions halted
+ * until next key event) */
+void Chip8::m_OpFX0A(Opcode op)
+{
+    int i;
+    bool keypressed = false;
+    
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    // look for a keypress
+    for(i=0; i<16; i++)
+    {
+        // if a key was pressed, store it in Vx
+        // and tell our if below we're done
+        if(m_Keys[i] == 1){
+            keypressed = true;
+            m_Registers[regx] = i;
+        }
+    }
+    // if no keys were pressed, move the PC
+    // back to this instruction again
+    if(!keypressed){
+        m_PC -= 2;
+    }
+}
+
+/* FX15: Sets delay timer to Vx */
+void Chip8::m_OpFX15(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    m_DelayTimer = m_Registers[regx];
+    
+    // test
+    //printf("Delay timer: 0x%X\n", m_DelayTimer);
+}
+
+/* FX18: sets sound timer to Vx */
+void Chip8::m_OpFX18(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    m_SoundTimer = m_Registers[regx];
 }
 
 /* FX1E: adds Vx to Address I */
@@ -284,14 +484,24 @@ void Chip8::m_OpFX1E(Opcode op)
     regx = regx >> 8;
     
     // test
-    printf("Address I before: 0x%X\n", m_AddressI);
-    printf("Vx: 0x%X\n", m_Registers[regx]);
+    //printf("Address I before: 0x%X\n", m_AddressI);
+    //printf("Vx: 0x%X\n", m_Registers[regx]);
     
     // add the value to I
     m_AddressI += m_Registers[regx];
     
     // test
-    printf("Address I after: 0x%X\n", m_AddressI);
+    //printf("Address I after: 0x%X\n", m_AddressI);
+}
+
+/* FX29: sets I to the location of the sprite for the
+ * character in Vx. Characters 0-F (hex) represented by 4x5 font */
+void Chip8::m_OpFX29(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
+    
+    m_AddressI = m_Registers[regx]*5; // 4x5
 }
 
 /* FX33: binary coded decimal - store Vx as
@@ -322,6 +532,20 @@ void Chip8::m_OpFX55(Opcode op)
     for(int i=0; i<=regx; i++)
     {
         m_GameMemory[m_AddressI+i] = m_Registers[i];
+    }
+    m_AddressI = m_AddressI + regx + 1;
+}
+
+/* FX65: fills V0 to Vx (including Vx) with values from
+ * memory starting at address I */
+void Chip8::m_OpFX65(Opcode op)
+{
+    int regx = op.Num2();
+    regx = regx >> 8;
+
+    for(int i=0; i<=regx; i++)
+    {
+        m_Registers[i] = m_GameMemory[m_AddressI+i];
     }
     m_AddressI = m_AddressI + regx + 1;
 }
