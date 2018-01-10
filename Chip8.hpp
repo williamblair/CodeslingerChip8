@@ -25,10 +25,10 @@ public:
     WORD getValue(void){return m_Value;}
 
     // ex) value is 0x1234
-    WORD Num1(void){return (m_Value & 0xF000);} // 0x1234 & 0xF000 = 0x1000
-    WORD Num2(void){return (m_Value & 0x0F00);} // 0x1234 & 0x0F00 = 0x0200
-    WORD Num3(void){return (m_Value & 0x00F0);} // 0x1234 & 0x00F0 = 0x0030
-    WORD Num4(void){return (m_Value & 0x000F);} // 0x1234 & 0x000F = 0x0004
+    WORD Num1(void){return (m_Value & 0xF000) >> 12;} // 0x1234 & 0xF000 = 0x1000
+    WORD Num2(void){return (m_Value & 0x0F00) >> 8;}  // 0x1234 & 0x0F00 = 0x0200
+    WORD Num3(void){return (m_Value & 0x00F0) >> 4;}  // 0x1234 & 0x00F0 = 0x0030
+    WORD Num4(void){return (m_Value & 0x000F);}       // 0x1234 & 0x000F = 0x0004
 
     WORD Num234(void){return (m_Value & 0x0FFF);} // used for op 1NNN
 

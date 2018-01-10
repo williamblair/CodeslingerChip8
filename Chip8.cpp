@@ -95,7 +95,7 @@ bool Chip8::RunNextInstruction(void)
         // decode
         switch(op.Num1())
         {
-            case 0x0000:
+            case 0x0:
                 switch(op.getValue())
                 {
                     case 0x00E0:
@@ -109,28 +109,28 @@ bool Chip8::RunNextInstruction(void)
                         break;
                 }
                 break;
-            case 0x1000:
+            case 0x1:
                 m_Op1NNN(op);
                 break;
-            case 0x2000:
+            case 0x2:
                 m_Op2NNN(op);
                 break;
-            case 0x3000:
+            case 0x3:
                 m_Op3XNN(op);
                 break;
-            case 0x4000:
+            case 0x4:
                 m_Op4XNN(op);
                 break;
-            case 0x5000:
+            case 0x5:
                 m_Op5XY0(op);
                 break;
-            case 0x6000:
+            case 0x6:
                 m_Op6XNN(op);
                 break;
-            case 0x7000:
+            case 0x7:
                 m_Op7XNN(op);
                 break;
-            case 0x8000:
+            case 0x8:
                 switch(op.Num4())
                 {
                     case 0x0:
@@ -165,22 +165,22 @@ bool Chip8::RunNextInstruction(void)
                         break;
                 }
                 break;
-            case 0x9000:
+            case 0x9:
                 m_Op9XY0(op);
                 break;
-            case 0xA000:
+            case 0xA:
                 m_OpANNN(op);
                 break;
-            case 0xB000:
+            case 0xB:
                 m_OpBNNN(op);
                 break;
-            case 0xC000:
+            case 0xC:
                 m_OpCXNN(op);
                 break;
-            case 0xD000:
+            case 0xD:
                 m_OpDXYN(op);
                 break;
-            case 0xE000:
+            case 0xE:
                 switch(op.Num34())
                 {
                     case 0x9E:
@@ -193,7 +193,7 @@ bool Chip8::RunNextInstruction(void)
                         throw op;
                 }
                 break;
-            case 0xF000:
+            case 0xF:
                 switch(op.Num34())
                 {
                     case 0x07:

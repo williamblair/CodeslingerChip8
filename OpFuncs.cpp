@@ -43,7 +43,6 @@ void Chip8::m_Op2NNN(Opcode op)
 void Chip8::m_Op3XNN(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
 
     // get NN
     int nn = op.Num34();
@@ -61,7 +60,6 @@ void Chip8::m_Op3XNN(Opcode op)
 void Chip8::m_Op4XNN(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
 
     // get NN
     int nn = op.Num34();
@@ -78,12 +76,10 @@ void Chip8::m_Op4XNN(Opcode op)
 void Chip8::m_Op5XY0(Opcode op)
 {
     // turn 0x5XY0 into 0xX
-    int regx = op.Num2(); // 0x0X00
-    regx = regx >> 8;     // 0xX
+    int regx = op.Num2();
 
     // turn 0x5XY0 into 0xY
-    int regy = op.Num3(); // 0x00Y0
-    regy = regy >> 4;     // 0xY
+    int regy = op.Num3();
 
     // if the registers are equal skip the next instruction
     if(m_Registers[regx] == m_Registers[regy]) {
@@ -98,7 +94,7 @@ void Chip8::m_Op6XNN(Opcode op)
     int nn = op.Num34();
 
     // get the register
-    int regx = op.Num2() >> 8;
+    int regx = op.Num2();
 
     // assign the value at the register
     m_Registers[regx] = nn;
@@ -115,7 +111,6 @@ void Chip8::m_Op7XNN(Opcode op)
 
     // get the register
     int regx = op.Num2();
-    regx = regx >> 8;
 
     // test
     //printf("Vx Before: 0x%X\n", m_Registers[regx]);
@@ -134,11 +129,9 @@ void Chip8::m_Op8XY0(Opcode op)
 {
     // get regx
     int regx = op.Num2();
-    regx = regx >> 8;
     
     // get regy
     int regy = op.Num3();
-    regy = regy >> 4;
     
     // set Vx = Vy
     m_Registers[regx] = m_Registers[regy];
@@ -148,10 +141,8 @@ void Chip8::m_Op8XY0(Opcode op)
 void Chip8::m_Op8XY1(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
     
     int regy = op.Num3();
-    regy = regy >> 4;
     
     m_Registers[regx] = m_Registers[regx] | m_Registers[regy];
 }
@@ -160,10 +151,8 @@ void Chip8::m_Op8XY1(Opcode op)
 void Chip8::m_Op8XY2(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
     
     int regy = op.Num3();
-    regy = regy >> 4;
     
     m_Registers[regx] = m_Registers[regx] & m_Registers[regy];
 }
@@ -172,10 +161,8 @@ void Chip8::m_Op8XY2(Opcode op)
 void Chip8::m_Op8XY3(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
     
     int regy = op.Num3();
-    regy = regy >> 4;
     
     m_Registers[regx] = m_Registers[regx] ^ m_Registers[regy];
 }
@@ -186,20 +173,8 @@ void Chip8::m_Op8XY4(Opcode op)
     m_Registers[0xF] = 0; // default flag 0 for no overflow
 
     int regx = op.Num2();
-    regx = regx >> 8;
 
     int regy = op.Num3();
-    regy = regy >> 4;
-
-    /*int xval = m_Registers[regx];
-    int yval = m_Registers[regy];
-
-    // test if there will be overflow
-    if(UCHAR_MAX - xval < yval) {
-        m_Registers[0xF] = 1;
-    }
-
-    m_Registers[regx] = xval + yval;*/
     
     int value = m_Registers[regx] + m_Registers[regy];
     
@@ -218,10 +193,8 @@ void Chip8::m_Op8XY5(Opcode op)
                           // 1 if adding and result > 255)
 
     int regx = op.Num2();
-    regx = regx >> 8;
 
     int regy = op.Num3();
-    regy = regy >> 4;
 
     int xval = m_Registers[regx];
     int yval = m_Registers[regy];
@@ -240,7 +213,6 @@ void Chip8::m_Op8XY5(Opcode op)
 void Chip8::m_Op8XY6(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
     
     // ex) 0b0011 & 1 = 1, 0b0010 & 1 = 0
     int LSB = m_Registers[regx] & 1;
@@ -255,10 +227,8 @@ void Chip8::m_Op8XY6(Opcode op)
 void Chip8::m_Op8XY7(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
     
     int regy = op.Num3();
-    regy = regy >> 4;
     
     // default 1 when no borrow
     m_Registers[0xF] = 1;
@@ -272,34 +242,26 @@ void Chip8::m_Op8XY7(Opcode op)
     m_Registers[regx] = m_Registers[regy] - m_Registers[regx];
 }
 
-/* 8XYE: shifts Vy left 1 and copies the result into Vx 
- * flag set to MSB of Vy before shift */
+/* 8XYE: shifts Vx left 1
+ * flag set to MSB of Vx before shift */
 void Chip8::m_Op8XYE(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
-    
-    int regy = op.Num3();
-    regy = regy >> 4;
     
     // ex) 0b10110111 >> 7  = 1, 0b00001101 >> 7 = 0
-    int MSB = m_Registers[regy] >> 7;
+    int MSB = m_Registers[regx] >> 7;
+    m_Registers[0xF] = MSB;
     
     // left shift
-    m_Registers[regy] = m_Registers[regy] << 1;
-    
-    // copy into Vx
-    m_Registers[regx] = m_Registers[regy];
+    m_Registers[regx] = m_Registers[regx] << 1;
 }
 
 /* 9XY0: skips next instruction if Vx != Vy */
 void Chip8::m_Op9XY0(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
     
     int regy = op.Num3();
-    regy = regy >> 4;
     
     if(m_Registers[regx] != m_Registers[regy]){
         m_PC += 2;
@@ -329,7 +291,6 @@ void Chip8::m_OpBNNN(Opcode op)
 void Chip8::m_OpCXNN(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
     
     m_Registers[regx] = (rand()%255) & op.Num34();
 }
@@ -339,9 +300,7 @@ void Chip8::m_OpDXYN(Opcode op)
 {
     const int SCALE = 10; // Chip8 res 64 32, our res 640 320
     int regx = op.Num2();
-    regx = regx >> 8;
     int regy = op.Num3();
-    regy = regy >> 4;
     
     int coordx = m_Registers[regx] * SCALE;
     int coordy = m_Registers[regy] * SCALE;
@@ -395,7 +354,6 @@ void Chip8::m_OpDXYN(Opcode op)
 void Chip8::m_OpEX9E(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
     
     int key = m_Registers[regx];
     
@@ -410,7 +368,6 @@ void Chip8::m_OpEX9E(Opcode op)
 void Chip8::m_OpEXA1(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
     
     int key = m_Registers[regx];
     
@@ -425,7 +382,6 @@ void Chip8::m_OpEXA1(Opcode op)
 void Chip8::m_OpFX07(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
     
     m_Registers[regx] = m_DelayTimer;
 }
@@ -439,7 +395,6 @@ void Chip8::m_OpFX0A(Opcode op)
     bool keypressed = false;
     
     int regx = op.Num2();
-    regx = regx >> 8;
     
     // look for a keypress
     for(i=0; i<16; i++)
@@ -462,7 +417,6 @@ void Chip8::m_OpFX0A(Opcode op)
 void Chip8::m_OpFX15(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
     
     m_DelayTimer = m_Registers[regx];
     
@@ -474,7 +428,6 @@ void Chip8::m_OpFX15(Opcode op)
 void Chip8::m_OpFX18(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
     
     m_SoundTimer = m_Registers[regx];
 }
@@ -484,7 +437,6 @@ void Chip8::m_OpFX1E(Opcode op)
 {
     // get regx
     int regx = op.Num2();
-    regx = regx >> 8;
     
     // test
     //printf("Address I before: 0x%X\n", m_AddressI);
@@ -502,7 +454,6 @@ void Chip8::m_OpFX1E(Opcode op)
 void Chip8::m_OpFX29(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
     
     m_AddressI = m_Registers[regx]*5; // 4x5
 }
@@ -512,7 +463,6 @@ void Chip8::m_OpFX29(Opcode op)
 void Chip8::m_OpFX33(Opcode op)
 {
     int regx = op.Num2();
-    regx  = regx >> 8;
 
     int value = m_Registers[regx];
 
@@ -530,7 +480,6 @@ void Chip8::m_OpFX33(Opcode op)
 void Chip8::m_OpFX55(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
 
     for(int i=0; i<=regx; i++)
     {
@@ -544,7 +493,6 @@ void Chip8::m_OpFX55(Opcode op)
 void Chip8::m_OpFX65(Opcode op)
 {
     int regx = op.Num2();
-    regx = regx >> 8;
 
     for(int i=0; i<=regx; i++)
     {
