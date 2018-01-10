@@ -98,9 +98,6 @@ void Chip8::m_Op6XNN(Opcode op)
 
     // assign the value at the register
     m_Registers[regx] = nn;
-
-    // test
-    //printf("Registers[0x%X]: 0x%X\n", regx, m_Registers[regx]);
 }
 
 /* 7XNN: adds NN to Vx (No flags/overflow check) */
@@ -112,15 +109,8 @@ void Chip8::m_Op7XNN(Opcode op)
     // get the register
     int regx = op.Num2();
 
-    // test
-    //printf("Vx Before: 0x%X\n", m_Registers[regx]);
-    //printf("NN: 0x%X\n", NN);
-
     // add the values
     m_Registers[regx] += NN;
-
-    // test
-    //printf("Vx After: 0x%X\n", m_Registers[regx]);
 
 }
 
@@ -276,9 +266,6 @@ void Chip8::m_OpANNN(Opcode op)
 
     // set I to its value
     m_AddressI = NNN;
-
-    // test
-    //printf("Address I: 0x%X\n", m_AddressI);
 }
 
 /* BNNN: jumps to address NNN + V0 */
@@ -359,7 +346,6 @@ void Chip8::m_OpEX9E(Opcode op)
     
     // if the key IS pressed, skip the next instruction
     if(m_Keys[key] == 1){
-        //printf("Keys[0x%X] IS pressed!\n", key);
         m_PC += 2;
     }
 }
@@ -373,7 +359,6 @@ void Chip8::m_OpEXA1(Opcode op)
     
     // if the key is NOT pressed, skip the next instruction
     if(m_Keys[key] == 0) {
-        //printf("Keys[0x%X] NOT pressed!\n", key);
         m_PC += 2;
     }
 }
@@ -419,9 +404,6 @@ void Chip8::m_OpFX15(Opcode op)
     int regx = op.Num2();
     
     m_DelayTimer = m_Registers[regx];
-    
-    // test
-    //printf("Delay timer: 0x%X\n", m_DelayTimer);
 }
 
 /* FX18: sets sound timer to Vx */
@@ -438,15 +420,8 @@ void Chip8::m_OpFX1E(Opcode op)
     // get regx
     int regx = op.Num2();
     
-    // test
-    //printf("Address I before: 0x%X\n", m_AddressI);
-    //printf("Vx: 0x%X\n", m_Registers[regx]);
-    
     // add the value to I
     m_AddressI += m_Registers[regx];
-    
-    // test
-    //printf("Address I after: 0x%X\n", m_AddressI);
 }
 
 /* FX29: sets I to the location of the sprite for the

@@ -230,9 +230,6 @@ bool Chip8::RunNextInstruction(void)
             default:
                 throw op;
         }
-
-        // DEBUG
-        //printf("0x%X  0x%X\n", m_PC, op.getValue());
     }
     catch(Opcode &o)
     {
