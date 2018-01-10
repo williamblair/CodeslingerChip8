@@ -95,7 +95,7 @@ void Chip8::m_Op5XY0(Opcode op)
 void Chip8::m_Op6XNN(Opcode op)
 {
     // get NN
-    WORD nn = op.Num34();
+    int nn = op.Num34();
 
     // get the register
     int regx = op.Num2() >> 8;
@@ -191,7 +191,7 @@ void Chip8::m_Op8XY4(Opcode op)
     int regy = op.Num3();
     regy = regy >> 4;
 
-    int xval = m_Registers[regx];
+    /*int xval = m_Registers[regx];
     int yval = m_Registers[regy];
 
     // test if there will be overflow
@@ -199,7 +199,16 @@ void Chip8::m_Op8XY4(Opcode op)
         m_Registers[0xF] = 1;
     }
 
-    m_Registers[regx] = xval + yval;
+    m_Registers[regx] = xval + yval;*/
+    
+    int value = m_Registers[regx] + m_Registers[regy];
+    
+    // if overflow set flag to 1
+    if(value > 255)
+        m_Registers[0xF] = 1;
+    
+    // Overflow can happen here I believe
+    m_Registers[regx] = m_Registers[regx] + m_Registers[regy];
 }
 
 /* 8XY5: Y is subtracted from register X */
@@ -218,33 +227,27 @@ void Chip8::m_Op8XY5(Opcode op)
     int yval = m_Registers[regy];
 
     // test if there will be underflow
-    if(yval > xval) {
+    if(xval < yval) {
         m_Registers[0xF] = 0;
     }
 
     // write the result
-    m_Registers[regx] = xval - yval;
+    m_Registers[regx] = m_Registers[regx] - m_Registers[regy];
 }
 
-/* 8XY6: shifts Vy right by 1 and copies result into Vx,
- * Flag is set to the LSB of Vy before the shift */
+/* 8XY6: shifts Vx right by 1
+ * Flag is set to the LSB of Vx before the shift */
 void Chip8::m_Op8XY6(Opcode op)
 {
     int regx = op.Num2();
     regx = regx >> 8;
     
-    int regy = op.Num3();
-    regy = regy >> 4;
-    
     // ex) 0b0011 & 1 = 1, 0b0010 & 1 = 0
-    int LSB = m_Registers[regy] & 1;
+    int LSB = m_Registers[regx] & 1;
     m_Registers[0xF] = LSB;
     
     // shift Vy by 1
-    m_Registers[regy] = m_Registers[regy] >> 1;
-    
-    // copy Vy into Vx
-    m_Registers[regx] = m_Registers[regy];
+    m_Registers[regx] = m_Registers[regx] >> 1;
 }
 
 /* 8XY7: sets Vx to Vy - Vx, Vf set to 0 when borrow,
